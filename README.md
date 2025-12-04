@@ -5,7 +5,7 @@ Final project for App Dev w/ AI, a command line task manager tool
 
 A simple, colorful command-line task manager built with Python. Track your tasks with priorities, due dates, and completion status—all from your terminal.
 
-![Tests](https://github.com/YOUR-USERNAME/YOUR-REPO/actions/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/ncal28/is4010-final-task-manager/actions/workflows/tests.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)
 
@@ -25,7 +25,7 @@ A simple, colorful command-line task manager built with Python. Track your tasks
 
 1. **Clone this repository:**
    ```bash
-   git clone https://github.com/YOUR-USERNAME/YOUR-REPO.git
+   git clone https://github.com/ncal28/is4010-final-task-manager.git
    cd YOUR-REPO
    ```
 
