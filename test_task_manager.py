@@ -141,3 +141,82 @@ class TestTaskManager:
         test_file = tmp_path / "nonexistent.json"
         manager = TaskManager(str(test_file))
         assert len(manager.tasks) == 0
+    
+    def test_list_tasks_filter_by_priority(self, temp_manager):
+        """Test filtering tasks by priority."""
+        temp_manager.add_task("High priority task", "high")
+        temp_manager.add_task("Medium priority task", "medium")
+        temp_manager.add_task("Low priority task", "low")
+        
+        high_tasks = temp_manager.list_tasks(priority_filter="high")
+        assert len(high_tasks) == 1
+        assert high_tasks[0].priority == "high"
+    
+    def test_get_tasks_sorted(self, temp_manager):
+        """Test that tasks are sorted by completion and priority."""
+        temp_manager.add_task("Low task", "low")
+        temp_manager.add_task("High task", "high")
+        temp_manager.add_task("Medium task", "medium")
+        temp_manager.complete_task(1)  # Complete the high task
+        
+        sorted_tasks = temp_manager.get_tasks_sorted()
+        
+        # First two should be incomplete (high and medium priority)
+        assert not sorted_tasks[0].completed
+        assert sorted_tasks[0].priority == "medium"
+        assert not sorted_tasks[1].completed
+        assert sorted_tasks[1].priority == "low"
+        
+        # Last should be completed
+        assert sorted_tasks[2].completed
+    
+    def test_update_task_title(self, temp_manager):
+        """Test updating a task's title."""
+        temp_manager.add_task("Original title")
+        updated = temp_manager.update_task(0, title="New title")
+        assert updated.title == "New title"
+    
+    def test_update_task_priority(self, temp_manager):
+        """Test updating a task's priority."""
+        temp_manager.add_task("Task", "low")
+        updated = temp_manager.update_task(0, priority="high")
+        assert updated.priority == "high"
+    
+    def test_update_task_invalid_priority(self, temp_manager):
+        """Test that updating with invalid priority raises error."""
+        temp_manager.add_task("Task")
+        with pytest.raises(ValueError):
+            temp_manager.update_task(0, priority="urgent")
+    
+    def test_update_task_due_date(self, temp_manager):
+        """Test updating a task's due date."""
+        temp_manager.add_task("Task")
+        updated = temp_manager.update_task(0, due_date="2024-12-31")
+        assert updated.due_date == "2024-12-31"
+    
+    def test_update_invalid_index(self, temp_manager):
+        """Test updating with invalid index returns None."""
+        result = temp_manager.update_task(99, title="New title")
+        assert result is None
+    
+    def test_get_statistics_empty(self, temp_manager):
+        """Test statistics with no tasks."""
+        stats = temp_manager.get_statistics()
+        assert stats["total"] == 0
+        assert stats["completed"] == 0
+        assert stats["incomplete"] == 0
+    
+    def test_get_statistics(self, temp_manager):
+        """Test statistics calculation."""
+        temp_manager.add_task("Task 1", "high")
+        temp_manager.add_task("Task 2", "medium")
+        temp_manager.add_task("Task 3", "low")
+        temp_manager.complete_task(0)
+        
+        stats = temp_manager.get_statistics()
+        assert stats["total"] == 3
+        assert stats["completed"] == 1
+        assert stats["incomplete"] == 2
+        assert stats["by_priority"]["high"] == 0  # Completed
+        assert stats["by_priority"]["medium"] == 1
+        assert stats["by_priority"]["low"] == 1
