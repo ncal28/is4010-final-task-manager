@@ -24,8 +24,8 @@ A powerful, colorful command-line task manager built with Python. Features smart
 
 1. **Clone this repository:**
    ```bash
-   git clone https://github.com/YOUR-USERNAME/YOUR-REPO.git
-   cd YOUR-REPO
+   git clone https://github.com/ncal28/is4010-final-task-manager.git
+   cd is4010-final-task-manager
    ```
 
 2. **Create a virtual environment (recommended):**

@@ -8,7 +8,7 @@
 
 ## Development Journey
 
-### Day 1 - Initial Setup (December XX, 2024)
+### Day 1 - Initial Setup (December 1, 2024)
 
 **Goals:** Set up repository, create basic Task and TaskManager classes, establish testing framework
 
@@ -28,7 +28,6 @@
 - How to use `@classmethod` for factory methods in Python
 - pytest fixtures for managing temporary test files
 - Using `tmp_path` fixture to avoid polluting the file system during tests
-- Setting up continuous integration with GitHub Actions
 
 **Challenges:**
 - Initially confused about when to call `save_tasks()` - AI helped me understand it should be called after every mutation
@@ -36,7 +35,7 @@
 
 ---
 
-### Day 2 - CLI Interface & Polish (December XX, 2024)
+### Day 2 - CLI Interface & Polish (December 2, 2024)
 
 **Goals:** Build full command-line interface, add filtering/sorting, colorize output, expand tests
 
@@ -90,8 +89,6 @@ priority_order = {"high": 0, "medium": 1, "low": 2}
 return sorted(tasks, key=lambda t: (t.completed, priority_order[t.priority]))
 ```
 
-The key insight was using a tuple in the lambda - Python sorts by first element, then second.
-
 #### Example 3: Statistics Calculation
 **Prompt:** "Write a method to calculate task statistics broken down by priority"
 
@@ -113,7 +110,7 @@ The key insight was using a tuple in the lambda - Python sorts by first element,
 
 ---
 
-### Day 3 - Advanced Features (December XX, 2024)
+### Day 3 - Advanced Features (December 6, 2024)
 
 **Goals:** Add smart date parsing, search functionality, and tagging system
 
