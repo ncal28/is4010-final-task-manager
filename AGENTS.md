@@ -296,7 +296,7 @@ Using AI **enhanced** my learning rather than replacing it:
 | Project concept | ✓ | | |
 | Task class structure | | ✓ | |
 | CLI design | ✓ | | |
-| argparse implementation | | ✓ | |
+| argparse implementation | | | ✓ |
 | Color scheme | ✓ | | |
 | colorama integration | | ✓ | |
 | Test cases (happy path) | | ✓ | |
@@ -307,9 +307,9 @@ Using AI **enhanced** my learning rather than replacing it:
 | README content | ✓ | | |
 | Debugging | | | ✓ |
 | Date parsing library choice | | ✓ | |
-| Date parsing implementation | | ✓ | |
+| Date parsing implementation | | | ✓ |
 | Tag system design | ✓ | | |
-| Tag implementation | | ✓ | |
+| Tag implementation | | | ✓ |
 | Search functionality | | ✓ | |
 | Overdue detection | | ✓ | |
 | Feature prioritization | ✓ | | |
@@ -338,3 +338,23 @@ Using AI **enhanced** my learning rather than replacing it:
 - **colorama**: Simple way to make CLIs look professional
 
 **Final thought**: AI didn't write this project for me—it helped me write it faster and better. I'm proud of what I built and confident I could build something similar without AI now.
+
+## Final Reflection
+
+### Project Statistics
+- **Total development time:** ~12-15 hours over 4 days
+- **Lines of code:** ~500 (task_manager.py + tests)
+- **Test coverage:** 40+ tests
+- **Features implemented:** 9 commands, smart dates, tags, search, bulk operations
+
+### What Worked Best with AI
+AI was a great tool to use to lead me on the right path and help my ideas come to life. When I didn't know the next steps, Claude and ChatGPT really helped me figure out a lot with this project.
+
+### What I Had to Figure Out Myself
+All of the planning for the project I did before I talked to AI. I wanted a task manager that was robust enough for regular use. I also had to leanr how to use libraries like colorama and dateparser to make sure the program flowed well.
+
+### Skills Gained
+I learned a lot about using new libraries, exporting data into JSON, and just more about writing in python in general.
+
+### Future Improvements
+I think different ways to sort the list would've worked great, along with an undo feature
