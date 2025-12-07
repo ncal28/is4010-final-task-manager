@@ -1,6 +1,7 @@
 import pytest
 import os
-from task_manager import Task, TaskManager
+from datetime import date, timedelta
+from task_manager import Task, TaskManager, parse_date
 
 
 class TestTask:
@@ -45,6 +46,7 @@ class TestTask:
             "title": "Restored task",
             "priority": "high",
             "due_date": None,
+            "tags": ["work", "urgent"],
             "completed": True,
             "created_at": "2024-01-01T00:00:00"
         }
@@ -52,6 +54,52 @@ class TestTask:
         assert task.title == "Restored task"
         assert task.priority == "high"
         assert task.completed is True
+        assert task.tags == ["work", "urgent"]
+    
+    def test_task_is_overdue(self):
+        """Test overdue detection."""
+        yesterday = (date.today() - timedelta(days=1)).isoformat()
+        task = Task("Overdue task", due_date=yesterday)
+        assert task.is_overdue() is True
+    
+    def test_task_not_overdue_future(self):
+        """Test that future dates aren't overdue."""
+        tomorrow = (date.today() + timedelta(days=1)).isoformat()
+        task = Task("Future task", due_date=tomorrow)
+        assert task.is_overdue() is False
+    
+    def test_task_not_overdue_completed(self):
+        """Test that completed tasks aren't considered overdue."""
+        yesterday = (date.today() - timedelta(days=1)).isoformat()
+        task = Task("Old task", due_date=yesterday)
+        task.mark_complete()
+        assert task.is_overdue() is False
+    
+    def test_task_add_tag(self):
+        """Test adding a tag to a task."""
+        task = Task("Tagged task")
+        task.add_tag("work")
+        assert "work" in task.tags
+    
+    def test_task_add_duplicate_tag(self):
+        """Test that duplicate tags aren't added."""
+        task = Task("Tagged task")
+        task.add_tag("work")
+        task.add_tag("work")
+        assert task.tags.count("work") == 1
+    
+    def test_task_remove_tag(self):
+        """Test removing a tag from a task."""
+        task = Task("Tagged task", tags=["work", "urgent"])
+        task.remove_tag("work")
+        assert "work" not in task.tags
+        assert "urgent" in task.tags
+    
+    def test_task_tags_case_insensitive(self):
+        """Test that tags are stored in lowercase."""
+        task = Task("Task")
+        task.add_tag("WORK")
+        assert task.tags == ["work"]
 
 
 class TestTaskManager:
@@ -208,15 +256,141 @@ class TestTaskManager:
     
     def test_get_statistics(self, temp_manager):
         """Test statistics calculation."""
+        yesterday = (date.today() - timedelta(days=1)).isoformat()
+        
         temp_manager.add_task("Task 1", "high")
-        temp_manager.add_task("Task 2", "medium")
-        temp_manager.add_task("Task 3", "low")
+        temp_manager.add_task("Task 2", "medium", yesterday)  # Overdue
+        temp_manager.add_task("Task 3", "low", tags=["work"])
         temp_manager.complete_task(0)
         
         stats = temp_manager.get_statistics()
         assert stats["total"] == 3
         assert stats["completed"] == 1
         assert stats["incomplete"] == 2
+        assert stats["overdue"] == 1  # Task 2 is overdue
         assert stats["by_priority"]["high"] == 0  # Completed
         assert stats["by_priority"]["medium"] == 1
         assert stats["by_priority"]["low"] == 1
+        assert "work" in stats["tags"]
+    
+    def test_search_tasks_by_title(self, temp_manager):
+        """Test searching tasks by title."""
+        temp_manager.add_task("Buy milk")
+        temp_manager.add_task("Buy groceries")
+        temp_manager.add_task("Meeting")
+        
+        results = temp_manager.search_tasks("buy")
+        assert len(results) == 2
+        assert all("buy" in t.title.lower() for t in results)
+    
+    def test_search_tasks_by_tag(self, temp_manager):
+        """Test searching tasks by tag."""
+        temp_manager.add_task("Task 1", tags=["work"])
+        temp_manager.add_task("Task 2", tags=["personal"])
+        temp_manager.add_task("Task 3", tags=["work", "urgent"])
+        
+        results = temp_manager.search_tasks("work")
+        assert len(results) == 2
+    
+    def test_search_tasks_case_insensitive(self, temp_manager):
+        """Test that search is case insensitive."""
+        temp_manager.add_task("Important Meeting")
+        
+        results = temp_manager.search_tasks("important")
+        assert len(results) == 1
+    
+    def test_get_tasks_by_tag(self, temp_manager):
+        """Test filtering tasks by tag."""
+        temp_manager.add_task("Task 1", tags=["work"])
+        temp_manager.add_task("Task 2", tags=["personal"])
+        temp_manager.add_task("Task 3", tags=["work"])
+        
+        work_tasks = temp_manager.get_tasks_by_tag("work")
+        assert len(work_tasks) == 2
+    
+    def test_get_all_tags(self, temp_manager):
+        """Test getting all unique tags."""
+        temp_manager.add_task("Task 1", tags=["work", "urgent"])
+        temp_manager.add_task("Task 2", tags=["personal"])
+        temp_manager.add_task("Task 3", tags=["work"])
+        
+        all_tags = temp_manager.get_all_tags()
+        assert len(all_tags) == 3
+        assert "work" in all_tags
+        assert "urgent" in all_tags
+        assert "personal" in all_tags
+    
+    def test_list_tasks_filter_by_tag(self, temp_manager):
+        """Test filtering task list by tag."""
+        temp_manager.add_task("Task 1", tags=["work"])
+        temp_manager.add_task("Task 2", tags=["personal"])
+        
+        work_tasks = temp_manager.list_tasks(tag_filter="work")
+        assert len(work_tasks) == 1
+        assert work_tasks[0].title == "Task 1"
+    
+    def test_add_tag_to_task(self, temp_manager):
+        """Test adding a tag to an existing task."""
+        temp_manager.add_task("Task")
+        result = temp_manager.add_tag_to_task(0, "urgent")
+        assert result is True
+        assert "urgent" in temp_manager.tasks[0].tags
+    
+    def test_remove_tag_from_task(self, temp_manager):
+        """Test removing a tag from a task."""
+        temp_manager.add_task("Task", tags=["work", "urgent"])
+        result = temp_manager.remove_tag_from_task(0, "urgent")
+        assert result is True
+        assert "urgent" not in temp_manager.tasks[0].tags
+        assert "work" in temp_manager.tasks[0].tags
+    
+    def test_update_task_with_tags(self, temp_manager):
+        """Test updating a task's tags."""
+        temp_manager.add_task("Task", tags=["old"])
+        updated = temp_manager.update_task(0, tags=["new", "fresh"])
+        assert updated.tags == ["new", "fresh"]
+    
+    def test_add_task_with_natural_date(self, temp_manager):
+        """Test adding task with natural language date."""
+        # This will use the parse_date function
+        task = temp_manager.add_task("Meeting", due_date="tomorrow")
+        expected = (date.today() + timedelta(days=1)).isoformat()
+        assert task.due_date == expected
+    
+    def test_clear_completed(self, temp_manager):
+        """Test clearing only completed tasks."""
+        temp_manager.add_task("Task 1")
+        temp_manager.add_task("Task 2")
+        temp_manager.add_task("Task 3")
+        temp_manager.complete_task(0)
+        temp_manager.complete_task(1)
+        
+        count = temp_manager.clear_completed()
+        assert count == 2
+        assert len(temp_manager.tasks) == 1
+        assert temp_manager.tasks[0].title == "Task 3"
+    
+    def test_clear_completed_none(self, temp_manager):
+        """Test clearing when no tasks are completed."""
+        temp_manager.add_task("Task 1")
+        temp_manager.add_task("Task 2")
+        
+        count = temp_manager.clear_completed()
+        assert count == 0
+        assert len(temp_manager.tasks) == 2
+    
+    def test_clear_all(self, temp_manager):
+        """Test clearing all tasks."""
+        temp_manager.add_task("Task 1")
+        temp_manager.add_task("Task 2")
+        temp_manager.add_task("Task 3")
+        
+        count = temp_manager.clear_all()
+        assert count == 3
+        assert len(temp_manager.tasks) == 0
+    
+    def test_clear_all_empty(self, temp_manager):
+        """Test clearing when list is already empty."""
+        count = temp_manager.clear_all()
+        assert count == 0
+        assert len(temp_manager.tasks) == 0
